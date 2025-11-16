@@ -1,7 +1,7 @@
 {
     "name": "pyramid",
     "description": "Rewrite text document (txt, md) according to \"The Pyramid Principle\" by Barbara Minto",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "author": {
         "name": "Kun"
     }
