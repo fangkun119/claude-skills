@@ -28,6 +28,7 @@ color: green
 **步骤1：标题优化**
 - 执行斜杠命令 `/pyramid:md-refine-titles {directory}/{base_name}.{extension}`
 - 使用完全提供的input_file_path参数
+- **重要指导：使用这个slash command /pyramid:md-refine-titles 时章节划分要粗一些，不要分的太细，确保每个章节内容充实**
 - **命令输出markdown内容到标准输出**
 - **将输出内容写入文件：{directory}/{base_name}_titled.md**
 - 等待完成后再继续
