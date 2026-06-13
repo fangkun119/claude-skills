@@ -1,0 +1,6 @@
+{
+  "eval_id": 0,
+  "eval_name": "流程正确性 - 完整三阶段执行",
+  "prompt": "请将 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/simple_doc.md 这个文档改写一下，目标读者是技术经理，希望能突出技术价值和应用场景。",
+  "assertions": []
+}

@@ -1,0 +1,40 @@
+{
+  "skill_name": "md-rewrite",
+  "evals": [
+    {
+      "id": 1,
+      "name": "Phase 1 - 工作环境准备",
+      "prompt": "执行 Phase 1 工作环境准备，为文档 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/very_simple_doc.md 创建工作目录和文件副本。",
+      "expected_output": "成功创建 workspace 目录，生成改写副本和备份文件。验证路径推导规则正确。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "脚本验证 - setup_workspace.py",
+      "prompt": "验证 setup_workspace.py 脚本功能是否正常。使用测试文档 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/very_simple_doc.md 进行测试。",
+      "expected_output": "脚本成功执行，返回正确的路径变量，工作目录和文件副本正确创建。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "脚本验证 - validate_titles.py",
+      "prompt": "验证 validate_titles.py 脚本功能。创建一个符合四级标题体系的测试文档并验证。",
+      "expected_output": "脚本正确识别标题层级和编号，验证通过时返回 valid=true，验证失败时返回具体的错误信息。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "System Rules - 源文件只读",
+      "prompt": "验证源文件只读规则。对 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/very_simple_doc.md 执行一些操作，确保源文件不被修改。",
+      "expected_output": "所有操作都在副本上进行，源文件的时间戳、内容、权限都保持不变。",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "System Rules - 四级标题体系",
+      "prompt": "验证四级标题体系规则。检查文档 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/structured_doc.md 的标题是否符合规范。",
+      "expected_output": "正确识别文档中的标题层级，验证编号格式是否符合四级标题体系规范。",
+      "files": []
+    }
+  ]
+}

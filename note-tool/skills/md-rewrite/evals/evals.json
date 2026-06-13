@@ -1,0 +1,96 @@
+{
+  "skill_name": "md-rewrite",
+  "evals": [
+    {
+      "id": 1,
+      "name": "流程正确性 - 完整三阶段执行",
+      "prompt": "请将 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/simple_doc.md 这个文档改写一下，目标读者是技术经理，希望能突出技术价值和应用场景。",
+      "expected_output": "成功执行完整的三阶段流程：Phase 1 创建工作目录和文件副本，Phase 2 完成 6 轮需求澄清并生成 requirements.md，Phase 3 完成文档改写。最终生成改写文件和备份文件，中间产物存放在 workspace 目录中。",
+      "files": [
+        "/Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/simple_doc.md"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "流程正确性 - 跳过需求澄清",
+      "prompt": "请改写 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/simple_doc.md 这个文档，我已经有需求文件了，位于 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/existing_requirements.md。",
+      "expected_output": "检测到 requirements_file_path 参数，直接复制现有需求文件到 workspace 目录，跳过 6 轮需求澄清流程，直接进入 Phase 3 执行改写。",
+      "files": [
+        "/Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/simple_doc.md",
+        "/Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/existing_requirements.md"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "改写质量 - 四级标题体系验证",
+      "prompt": "请改写 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/unstructured_doc.md 这个文档，这是一个技术文档，需要重新组织结构并优化表达。",
+      "expected_output": "改写后的文档严格遵守四级标题体系规范：Level 1 使用 `## {n}. ` 格式，Level 2 使用 `### {n}.{m} ` 格式，Level 3 使用 `#### ({k}) ` 格式，Level 4 使用 `##### {circled_n} ` 格式。不出现超出四级的标题。",
+      "files": [
+        "/Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/unstructured_doc.md"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "改写质量 - Option A 保持章节顺序",
+      "prompt": "请改写 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/structured_doc.md 这个文档，原文的章节组织很好，只需要优化各章内容，不要改变章节顺序。目标读者是初级开发者，希望能深入浅出地讲解。",
+      "expected_output": "选择 Option A 执行路径，保持原文的章节顺序，通过章拆分和逆序逐一改写完成文档优化。改写后的内容更易于初级开发者理解。",
+      "files": [
+        "/Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/structured_doc.md"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "改写质量 - Option B 重组章节",
+      "prompt": "请改写 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/disorganized_doc.md 这个文档，原文的章节组织很混乱，需要重新组织结构。目标读者是技术决策者，希望能快速抓住技术价值。",
+      "expected_output": "选择 Option B 执行路径，通过规格分析、任务拆分、计划执行三个操作重新组织文档结构。改写后的文档结构清晰，便于技术决策者快速理解技术价值。",
+      "files": [
+        "/Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/disorganized_doc.md"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "边界情况 - 源文件只读",
+      "prompt": "请改写 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/simple_doc.md 这个文档，让它更适合向业务人员介绍。",
+      "expected_output": "在整个改写过程中，源文件 simple_doc.md 保持完全不变。所有改写操作都在 simple_doc_rewritten.md 副本上进行。源文件的修改时间、内容、权限都不应发生任何变化。",
+      "files": [
+        "/Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/simple_doc.md"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "边界情况 - 工作区目录隔离",
+      "prompt": "请改写 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/simple_doc.md 这个文档，希望能更简洁一些。",
+      "expected_output": "所有中间产物（requirements.md、spec_*.md、plan.md 等）都存放在 workspace/simple_doc/ 目录中，不会散落在源文件所在目录的其他位置。改写副本 simple_doc_rewritten.md 和备份 simple_doc_backup.md 存放在源文件同目录下。",
+      "files": [
+        "/Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/simple_doc.md"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "边界情况 - 图片预处理",
+      "prompt": "请改写 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/doc_with_images.md 这个文档，文档中有一些图片需要处理。",
+      "expected_output": "在改写前，对每张图片进行预处理，在图片下方添加 Markdown 注释，记录图片路径、用途和内容描述。注释格式符合规范，便于后续改写参考。",
+      "files": [
+        "/Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/doc_with_images.md"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "完整端到端 - 复杂文档改写",
+      "prompt": "我有一份技术文档 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/complex_doc.md 需要改写。这份文档是给开发人员看的内部技术文档，现在需要改写成给客户看的产品介绍文档。重点要突出产品价值、应用场景和竞争优势，技术细节要适度简化。文档中有很多图片，需要重新组织图片和文字的配合。",
+      "expected_output": "完整执行三阶段流程。Phase 2 通过 6 轮需求澄清，明确从内部技术文档到产品介绍文档的改写方向。Phase 3 选择 Option B 重组章节结构，通过规格分析、任务拆分、计划执行完成改写。改写后的文档突出产品价值，适合客户阅读，图片配合得当，风格统一。",
+      "files": [
+        "/Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/complex_doc.md"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "完整端到端 - 快速模式（有初始需求）",
+      "prompt": "请将 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/simple_doc.md 这个文档改写为培训教材。我已经明确了需求：读者是入职三个月的新工程师，目标是帮助他们快速了解系统架构和核心概念。风格要友好，多用图表和示例，减少抽象描述。代码要完整保留在 code block 中。",
+      "expected_output": "Phase 2 在用户已提供的初始需求基础上，通过 6 轮提问进一步澄清细节（或确认初始需求已足够完整）。Phase 3 执行改写，生成符合培训教材要求的文档。所有改写都基于初始需求进行，体现用户指定的风格要求。",
+      "files": [
+        "/Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/simple_doc.md"
+      ]
+    }
+  ]
+}
