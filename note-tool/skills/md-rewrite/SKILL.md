@@ -125,14 +125,14 @@ flowchart LR
 
 | 轮次 | 澄清问题 | 是否多选 | 对应变量 | 示例答案 |
 |------|----------|----------|----------|----------|
-| 1 | 改写后的文档将用于哪些场景？ | 容许多选 | `document_purposes` | 技术培训、向技术经理介绍 |
-| 2 | 改写后的文档面向哪些读者？他们各自的核心诉求是什么？ | 容许多选 | `audience_and_needs` | 程序员（学习技术）、技术经理（了解价值） |
-| 3 | 改写时应扮演什么角色身份？该角色擅长什么？ | 容许多选 | `rewriter_personas` | 资深架构师、擅长技术可视化 |
-| 4 | 改写后的文档应采用怎样的表达风格？ | 容许多选 | `writing_style` | 用词精炼、使用图表展示 |
-| 5 | 改写过程中有哪些不可违反的硬性规则？ | 容许多选 | `hard_constraints` | 代码完整保留、操作步骤不省略 |
-| 6 | 还有其他需要澄清的问题吗？ | 容许多选 | `additional_clarifications` | 命令输出保留在 code block |
+| 1 | 改写后的文档将用于哪些场景？ | **强制多选** | `document_purposes` | 技术培训、向技术经理介绍 |
+| 2 | 改写后的文档面向哪些读者？他们各自的核心诉求是什么？ | **强制多选** | `audience_and_needs` | 程序员（学习技术）、技术经理（了解价值） |
+| 3 | 改写时应扮演什么角色身份？该角色擅长什么？ | **强制多选** | `rewriter_personas` | 资深架构师、擅长技术可视化 |
+| 4 | 改写后的文档应采用怎样的表达风格？ | **强制多选** | `writing_style` | 用词精炼、使用图表展示 |
+| 5 | 改写过程中有哪些不可违反的硬性规则？ | **强制多选** | `hard_constraints` | 代码完整保留、操作步骤不省略 |
+| 6 | 还有其他需要澄清的问题吗？ | **强制多选** | `additional_clarifications` | 命令输出保留在 code block |
 
-**备选答案生成策略**：每一轮提问时，基于 `initial_requirements` 和源文件内容，结合前几轮用户的回答，生成该轮可能性最高的若干备选答案，按可能性从高到低排列。
+**备选答案生成策略（强制多选）**：每一轮提问时，Sub Agent **必须**使用 AskUserQuestion 工具，**强制设置** `multiSelect: true`，允许用户选择多个备选答案。Sub Agent 基于对 `initial_requirements` 和源文件内容的理解，结合前几轮用户的回答，生成该轮可能性最高的若干备选答案，按可能性从高到低排列，与问题一起提供给用户。用户可多选、也可打字补充。
 
 **测试模式**：当 `test_mode=true` 时，跳过 6 轮 AskUserQuestion 交互，直接使用预设的默认需求生成 `requirements.md`。预设需求如下：
 
@@ -175,7 +175,7 @@ Phase 2 应在一个**独立上下文的 Sub Agent** 中执行：
 Sub Agent 指令：
 1. 阅读 source_file_path 和 initial_requirements（如有）
 2. 检查是否提供 requirements_file_path
-3. 若未提供，通过 6 轮 AskUserQuestion 澄清需求
+3. 若未提供，通过 6 轮 AskUserQuestion 澄清需求，**每一轮都必须设置 multiSelect: true，强制支持多选**
 4. 将结果保存为 JSON 格式到 requirements.md
 5. 报告完成
 ```
@@ -296,7 +296,7 @@ Phase 3 应在一个**独立上下文的 Sub Agent** 中执行：
 ```
 Sub Agent 指令：
 1. 阅读 rewritten_file_path、requirements.md 和 initial_requirements
-2. 通过 AskUserQuestion 确定执行方式（Option A 或 B）
+2. 通过 AskUserQuestion 确定执行方式（Option A 或 B），设置 multiSelect: false（单选）
 3. 执行文档图片预处理
 4. 根据用户选择，进入 Option A 或 Option B
 5. 遵守并发控制规则：2 个 Sub Agent 一组执行

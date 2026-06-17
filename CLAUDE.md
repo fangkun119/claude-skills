@@ -62,3 +62,8 @@ Use `uv` to create a Python 3.12 venv (`.venv`) for any Python code in this repo
 - Python ≥3.12 + `uv` package manager (for note-tool skills)
 - `markitdown[all]==0.1.3` (installed on-demand into `.venv`)
 - TUNA PyPI mirror (`https://pypi.tuna.tsinghua.edu.cn/simple/`) used for Chinese network acceleration
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->

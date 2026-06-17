@@ -1,7 +1,7 @@
 {
     "name": "note-tool",
     "description": "文档格式转换与改写工具集：支持 PDF/DOCX/DOC/PPT/PPTX/HTML 转 Markdown，Markdown 文档的专业改写（三阶段流程：准备 → 需求澄清 → 文档改写），以及语音转录稿的错误纠正",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "author": {
         "name": "Kun"
     }
