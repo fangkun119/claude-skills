@@ -1,6 +1,0 @@
-{
-  "eval_id": "simple-1",
-  "eval_name": "完整三阶段流程 - 测试模式",
-  "prompt": "使用测试模式完整执行 md-rewrite Skill 的三阶段流程。源文档是 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/very_simple_doc.md。设置 test_mode=true，这样会跳过 6 轮用户交互，使用预设需求。请验证：1) Phase 1 工作环境准备 2) Phase 2 需求文件生成（测试模式）3) Phase 3 文档改写（选择 Option A 保持章节顺序）。",
-  "assertions": []
-}

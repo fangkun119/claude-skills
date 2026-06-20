@@ -1,4 +1,7 @@
 **/.DS_Store
+**/__pycache__
 
 # regression测试所使用的文件
 repo-desktop/temp/
+
+

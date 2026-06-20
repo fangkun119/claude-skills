@@ -1,6 +1,0 @@
-{
-  "eval_id": "simple-0",
-  "eval_name": "Phase 1 - 工作环境准备",
-  "prompt": "执行 Phase 1 工作环境准备，为文档 /Users/ken/Code/cursor/claude-code-skills/note-tool/skills/md-rewrite/evals/fixtures/very_simple_doc.md 创建工作目录和文件副本。",
-  "assertions": []
-}

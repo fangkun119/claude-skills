@@ -57,7 +57,7 @@ def setup_workspace(source_file_path: str) -> dict:
     # 构建路径
     workspace_directory = source_file_dir / "workspace" / source_file_name
     rewritten_file_path = source_file_dir / f"{source_file_name}_rewritten.md"
-    backup_file_path = source_file_dir / f"{source_file_name}_backup.md"
+    backup_file_path = workspace_directory / f"{source_file_name}_backup.md"
 
     # 创建工作目录
     workspace_directory.mkdir(parents=True, exist_ok=True)

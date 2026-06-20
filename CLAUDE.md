@@ -48,10 +48,11 @@ Each plugin lives in its own top-level directory with:
 
 ## Development Directories
 
-- **repo-desktop/workspaces/**: Development workspaces for each plugin (pyramid, note-tool)
+- **repo-desktop/workspaces/**: Development workspaces for each plugin (pyramid, note-tool). Temporary files generated during the development and testing are all placed in this directory.
 - **repo-desktop/regression/**: Regression test specs (markdown format) for plugin features
 - **repo-desktop/chats/**: Chat transcripts and notes from plugin development sessions
 - **.claude/commands/**: Project-level slash commands (e.g., `md-fix-voice-text`)
+
 
 ## Python Development
 
@@ -67,3 +68,9 @@ Use `uv` to create a Python 3.12 venv (`.venv`) for any Python code in this repo
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
 <!-- SPECKIT END -->
+
+## Naming Convensions
+
+Naming must use precise, clear, and concise phrasing to express its meaning. For example, you can use names like ‘titles_scripts_tests’ to precisely indicate the test subject, while names like ‘quest_check_tests’ that are vague and general should not be used.
+
+
