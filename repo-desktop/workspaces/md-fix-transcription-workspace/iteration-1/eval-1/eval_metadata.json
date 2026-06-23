@@ -1,6 +1,0 @@
-{
-  "eval_id": 1,
-  "eval_name": "english-without-domain-knowledge",
-  "prompt": "Please fix the voice recognition errors in this transcript: /Users/ken/Code/cursor/claude-code-skills/repo-desktop/workspaces/note-tool/transcription-correct/transcription-sample.md",
-  "assertions": []
-}

@@ -1,6 +1,0 @@
-{
-  "eval_id": 2,
-  "eval_name": "auto-detect-domain-context",
-  "prompt": "Correct the voice transcription errors in repo-desktop/workspaces/note-tool/transcription-correct/transcription-sample.md. I don't have specific domain information, but it's a technical lecture.",
-  "assertions": []
-}

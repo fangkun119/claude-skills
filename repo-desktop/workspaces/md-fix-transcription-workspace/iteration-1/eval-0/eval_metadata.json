@@ -1,6 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "chinese-with-domain-knowledge",
-  "prompt": "帮我修正这个语音转录稿中的识别错误：/Users/ken/Code/cursor/claude-code-skills/repo-desktop/workspaces/note-tool/transcription-correct/transcription-sample.md。这是关于SEATA分布式事务的技术讲座，涉及Seata、Spring Cloud Alibaba、Spring Boot、分布式事务、AT模式、TC、TM、RM、XA、TCC、SAGA、两阶段提交、2PC、全局事务、分支事务、XID、undo log、全局锁、本地锁、@GlobalTransactional、@GlobalLock、OpenFeign、Netty、Remoting协议等专业术语。",
-  "assertions": []
-}

@@ -1,0 +1,84 @@
+{
+  "skill_name": "md-img-to-html",
+  "evals": [
+    {
+      "id": 1,
+      "name": "basic-conversion",
+      "prompt": "把这个文件中的所有 Markdown 图片转换为 HTML <img> 标签格式",
+      "expected_output": "所有 Markdown 格式的图片（![[...]] 和 ![...]）都被转换为 HTML <img> 标签，图片路径保持不变，没有 alt 文字的图片使用默认值'替换文字'，没有指定宽度的图片使用默认宽度 800px，指定了宽度的图片保持原宽度",
+      "files": ["test-input-1.md"],
+      "assertions": [
+        {
+          "name": "preserves_image_paths_exactly",
+          "description": "所有图片路径必须严格保持与输入文件一致，不做任何修改"
+        },
+        {
+          "name": "uses_default_alt_text",
+          "description": "当 Markdown 中没有 alt 文字时，必须使用默认值'替换文字'而不是文件名"
+        },
+        {
+          "name": "uses_style_attribute_format",
+          "description": "必须使用 style='display: block; width: Xpx;' 格式，而不是 width='Xpx' 属性"
+        },
+        {
+          "name": "applies_default_width_800px",
+          "description": "当 Markdown 中没有指定宽度时，必须使用默认宽度 800px"
+        },
+        {
+          "name": "preserves_markdown_specified_widths",
+          "description": "当 Markdown 中指定了宽度时，必须保留原宽度不变"
+        },
+        {
+          "name": "converts_obsidian_wikilinks",
+          "description": "必须正确转换 Obsidian wikilink 格式 ![[path]] 为 HTML <img> 标签"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "mixed-html-alt-check",
+      "prompt": "将这个文档中的图片转换为 HTML 格式，并确保所有图片都有有效的 alt 属性",
+      "expected_output": "Markdown 图片被转换为 HTML <img> 标签。已有的 HTML <img> 标签保持不变，但其 alt 属性会被检查：没有 alt 或 alt 为空的图片会被填充默认值'替换文字'",
+      "files": ["test-input-2.md"],
+      "assertions": [
+        {
+          "name": "fills_missing_html_alt_attributes",
+          "description": "已有的 HTML <img> 标签如果缺少 alt 属性，必须填充默认值'替换文字'"
+        },
+        {
+          "name": "fills_empty_html_alt_attributes",
+          "description": "已有的 HTML <img> 标签如果 alt 为空 (alt='')，必须填充默认值'替换文字'"
+        },
+        {
+          "name": "preserves_existing_html_structure",
+          "description": "已有的 HTML <img> 标签的其他属性（src, style等）必须保持不变"
+        },
+        {
+          "name": "converts_markdown_images_in_mixed_file",
+          "description": "必须转换文件中的 Markdown 格式图片为 HTML <img> 标签"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "custom-default-width",
+      "prompt": "使用 100% 作为默认宽度，把这个文件中的图片转换为 HTML 格式",
+      "expected_output": "所有没有指定宽度的图片使用 width: 100%，指定了宽度的图片（300px 和 450px）保持原宽度不变。所有图片都有 alt 属性，没有 alt 的使用默认值'替换文字'",
+      "files": ["test-input-3.md"],
+      "assertions": [
+        {
+          "name": "uses_custom_default_width",
+          "description": "当用户指定了默认宽度（100%）时，没有指定宽度的图片必须使用该默认值"
+        },
+        {
+          "name": "preserves_explicit_widths",
+          "description": "当 Markdown 中明确指定了宽度时，必须保留原宽度不变，不使用默认值"
+        },
+        {
+          "name": "applies_custom_width_correctly",
+          "description": "自定义默认宽度必须正确应用为 style='display: block; width: 100%;' 格式"
+        }
+      ]
+    }
+  ]
+}

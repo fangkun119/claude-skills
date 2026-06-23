@@ -1,6 +1,0 @@
-{
-  "eval_id": 1,
-  "eval_name": "seata-technical-transcription",
-  "prompt": "Fix the voice transcription errors in repo-desktop/workspaces/note-tool/transcription-correct/transcription-sample.md. The domain is about SEATA distributed transactions - key terms include Seata, Spring Cloud Alibaba, Spring Boot, AT mode, TC, TM, RM, XA, TCC, SAGA, two-phase commit, 2PC, global transaction, branch transaction, XID, undo log, global lock, local lock, @GlobalTransactional, @GlobalLock, OpenFeign, Netty, Remoting protocol, read isolation, write isolation, dirty read, read committed, read uncommitted, SELECT FOR UPDATE, tx-service-group, JDBC, MySQL, Oracle, Dameng database, before-image, after-image, feature-dev branch.",
-  "assertions": []
-}

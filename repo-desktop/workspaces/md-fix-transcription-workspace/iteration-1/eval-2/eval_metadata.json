@@ -1,6 +1,0 @@
-{
-  "eval_id": 2,
-  "eval_name": "english-with-explicit-iterations",
-  "prompt": "I have a speech-to-text markdown file that needs cleaning. Process this transcription with 3 iterations: /Users/ken/Code/cursor/claude-code-skills/repo-desktop/workspaces/note-tool/transcription-correct/transcription-sample.md. Domain: distributed systems, microservices, transaction management, database consistency, Spring framework ecosystem.",
-  "assertions": []
-}

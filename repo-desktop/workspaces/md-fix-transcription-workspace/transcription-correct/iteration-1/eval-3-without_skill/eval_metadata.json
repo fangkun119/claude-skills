@@ -1,6 +1,0 @@
-{
-  "eval_id": 3,
-  "eval_name": "specify-correction-rounds",
-  "prompt": "Fix the transcription in repo-desktop/workspaces/note-tool/transcription-correct/transcription-sample.md with 2 correction rounds. Domain: SEATA distributed transactions framework.",
-  "assertions": []
-}
