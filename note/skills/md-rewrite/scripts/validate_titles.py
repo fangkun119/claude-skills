@@ -88,6 +88,55 @@ CIRCLED_NUMBERS = {
     '⑯': 16, '⑰': 17, '⑱': 18, '⑲': 19, '⑳': 20
 }
 
+# 代码围栏（fenced code block）的正则：行首允许最多 3 个空格缩进，其后是 ≥3 个反引号。
+# 用于识别 markdown 代码块边界，跳过其内部内容（避免把代码块里的 #/## 当成真实标题）。
+FENCE_OPEN_RE = re.compile(r'^ {0,3}(`{3,})(.*)$')
+
+
+def iter_code_aware_lines(file_path: str):
+    """
+    逐行读取 markdown 文件，自动跳过"代码围栏"内部的行。
+
+    遵循 CommonMark 围栏代码块语义：
+    - 一行若以 ≥3 个反引号开头（允许最多 3 空格缩进），则开启一个代码块，
+      并记录开启围栏的反引号数量（fence_len）。
+    - 只有遇到"相同数量反引号"的围栏行，才关闭该代码块。
+      （例如 4 反引号开启的围栏，只能被 4 反引号行关闭；期间出现的 3 反引号行
+      视为代码内容，不会提前关闭——这正是嵌套代码块的写法。）
+    - 在任何代码块开启期间，所有行都不产出（跳过）。
+
+    这解决了"代码块内部的 #/## 标题、###### 越级"被误判为真实标题的问题。
+    覆盖所有 ≥3 反引号的围栏（自然包含 ≥4 反引号的嵌套样例场景）。
+
+    Yields:
+        (line_num, line) —— 仅产出不在代码块内的行，line 已 rstrip。
+    """
+    fence_len = 0  # >0 表示当前处于代码块内，值为开启围栏的反引号数量
+    fence_close_re = None  # 当前代码块的关闭正则（匹配相同数量的反引号）
+
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line_num, raw_line in enumerate(f, 1):
+            line = raw_line.rstrip()
+
+            if fence_len > 0:
+                # 当前在代码块内：只有"相同数量反引号"的行能关闭它
+                if fence_close_re and fence_close_re.match(line):
+                    fence_len = 0
+                    fence_close_re = None
+                # 否则该行属于代码内容，跳过（不 yield）
+                continue
+
+            # 当前不在代码块内：检查这一行是否开启新的代码块
+            open_match = FENCE_OPEN_RE.match(line)
+            if open_match:
+                fence_len = len(open_match.group(1))
+                # 关闭围栏：行首（最多 3 空格缩进）后恰好相同数量的反引号，
+                # 其后只能跟空白（CommonMark 要求关闭围栏行不含其它内容）。
+                fence_close_re = re.compile(r'^ {0,3}`{%d}\s*$' % fence_len)
+                continue  # 开启行本身也不当作标题
+
+            yield line_num, line
+
 
 class TitleInfo:
     """标题信息"""
@@ -205,12 +254,46 @@ def parse_all_titles(file_path: str) -> List[TitleInfo]:
     """
     titles = []
 
-    with open(file_path, 'r', encoding='utf-8') as f:
-        for line_num, line in enumerate(f, 1):
-            line = line.rstrip()
+    # 用 iter_code_aware_lines 跳过代码围栏内部的行，
+    # 避免把代码块里的 #/## 标题误判为文档真实标题。
+    for line_num, line in iter_code_aware_lines(file_path):
 
-            # 尝试用严格模式匹配
-            for level, pattern in TITLE_PATTERNS.items():
+        # 尝试用严格模式匹配
+        for level, pattern in TITLE_PATTERNS.items():
+            match = pattern.match(line)
+            if match:
+                level_num = int(level.split('_')[1])
+                if level_num == 1:
+                    numbering = match.group(1)
+                    content = match.group(2)
+                    prefix = "##"
+                elif level_num == 2:
+                    numbering = f"{match.group(1)}.{match.group(2)}"
+                    content = match.group(3)
+                    prefix = "###"
+                elif level_num == 3:
+                    numbering = f"({match.group(1)})"
+                    content = match.group(2)
+                    prefix = "####"
+                else:  # level 4
+                    numbering = match.group(1)
+                    content = match.group(2)
+                    prefix = "#####"
+
+                titles.append(TitleInfo(
+                    line_num=line_num,
+                    level=level_num,
+                    raw_line=line,
+                    prefix=prefix,
+                    numbering=numbering,
+                    content=content,
+                    is_valid_format=True
+                ))
+                break
+
+        # 如果严格模式不匹配，尝试宽松模式（用于检测格式错误）
+        if not any(t.line_num == line_num for t in titles):
+            for level, pattern in LOOSE_PATTERNS.items():
                 match = pattern.match(line)
                 if match:
                     level_num = int(level.split('_')[1])
@@ -238,73 +321,39 @@ def parse_all_titles(file_path: str) -> List[TitleInfo]:
                         prefix=prefix,
                         numbering=numbering,
                         content=content,
-                        is_valid_format=True
+                        is_valid_format=False
                     ))
                     break
 
-            # 如果严格模式不匹配，尝试宽松模式（用于检测格式错误）
-            if not any(t.line_num == line_num for t in titles):
-                for level, pattern in LOOSE_PATTERNS.items():
-                    match = pattern.match(line)
-                    if match:
-                        level_num = int(level.split('_')[1])
-                        if level_num == 1:
-                            numbering = match.group(1)
-                            content = match.group(2)
-                            prefix = "##"
-                        elif level_num == 2:
-                            numbering = f"{match.group(1)}.{match.group(2)}"
-                            content = match.group(3)
-                            prefix = "###"
-                        elif level_num == 3:
-                            numbering = f"({match.group(1)})"
-                            content = match.group(2)
-                            prefix = "####"
-                        else:  # level 4
-                            numbering = match.group(1)
-                            content = match.group(2)
-                            prefix = "#####"
-
-                        titles.append(TitleInfo(
-                            line_num=line_num,
-                            level=level_num,
-                            raw_line=line,
-                            prefix=prefix,
-                            numbering=numbering,
-                            content=content,
-                            is_valid_format=False
-                        ))
-                        break
-
-            # 如果严格模式和宽松模式都不匹配，再检查是否是"无编号标题"
-            # 这一层很重要：真实文档中常见的 `## 执行引擎是什么` 这种纯文本标题，
-            # 既不匹配严格模式（要求数字编号）也不匹配宽松模式（也要求至少一个数字），
-            # 但它们确实是 Markdown 标题，违反了四级标题体系规范。
-            # 如果不识别它们，validate_titles.py 会漏报，Phase 4 形同虚设。
-            if not any(t.line_num == line_num for t in titles):
-                # 匹配 ##/###/####/##### 开头但后面是非空白字符的行
-                # （排除 ##  后只有空格或空内容的情况，那是"空标题"由其他检查处理）
-                bare_title_match = re.match(r'^(#{2,5})\s+(\S.*)$', line)
-                if bare_title_match:
-                    prefix = bare_title_match.group(1)
-                    content = bare_title_match.group(2)
-                    # 注意：标题层级（用于 SKILL.md 的 Level 1-4 体系）与 # 的数量是映射关系
-                    # ## → Level 1、### → Level 2、#### → Level 3、##### → Level 4
-                    # 不能直接用 len(prefix)，否则 ## 会被错误标记为 Level 2
-                    prefix_to_level = {"##": 1, "###": 2, "####": 3, "#####": 4}
-                    level_num = prefix_to_level.get(prefix)
-                    # Level 5+（即 ###### 或更多）由 check_level_overflow 处理
-                    # 这里只处理 Level 1-4 范围内的无编号标题
-                    if level_num is not None:
-                        titles.append(TitleInfo(
-                            line_num=line_num,
-                            level=level_num,
-                            raw_line=line,
-                            prefix=prefix,
-                            numbering="(missing)",
-                            content=content,
-                            is_valid_format=False
-                        ))
+        # 如果严格模式和宽松模式都不匹配，再检查是否是"无编号标题"
+        # 这一层很重要：真实文档中常见的 `## 执行引擎是什么` 这种纯文本标题，
+        # 既不匹配严格模式（要求数字编号）也不匹配宽松模式（也要求至少一个数字），
+        # 但它们确实是 Markdown 标题，违反了四级标题体系规范。
+        # 如果不识别它们，validate_titles.py 会漏报，Phase 4 形同虚设。
+        if not any(t.line_num == line_num for t in titles):
+            # 匹配 ##/###/####/##### 开头但后面是非空白字符的行
+            # （排除 ##  后只有空格或空内容的情况，那是"空标题"由其他检查处理）
+            bare_title_match = re.match(r'^(#{2,5})\s+(\S.*)$', line)
+            if bare_title_match:
+                prefix = bare_title_match.group(1)
+                content = bare_title_match.group(2)
+                # 注意：标题层级（用于 SKILL.md 的 Level 1-4 体系）与 # 的数量是映射关系
+                # ## → Level 1、### → Level 2、#### → Level 3、##### → Level 4
+                # 不能直接用 len(prefix)，否则 ## 会被错误标记为 Level 2
+                prefix_to_level = {"##": 1, "###": 2, "####": 3, "#####": 4}
+                level_num = prefix_to_level.get(prefix)
+                # Level 5+（即 ###### 或更多）由 check_level_overflow 处理
+                # 这里只处理 Level 1-4 范围内的无编号标题
+                if level_num is not None:
+                    titles.append(TitleInfo(
+                        line_num=line_num,
+                        level=level_num,
+                        raw_line=line,
+                        prefix=prefix,
+                        numbering="(missing)",
+                        content=content,
+                        is_valid_format=False
+                    ))
 
     return titles
 
@@ -545,18 +594,17 @@ def check_level_overflow(file_path: str) -> List[Dict]:
     """
     errors = []
 
-    with open(file_path, 'r', encoding='utf-8') as f:
-        for line_num, line in enumerate(f, 1):
-            line = line.rstrip()
-            # 检查是否有超出四级体系的标题（Level 5+）
-            if line.startswith("######"):
-                errors.append({
-                    "line": line_num,
-                    "type": "overflow",
-                    "level": "Level 5+",
-                    "message": f"发现超过四级的标题（Level 5+），违反四级标题体系规范",
-                    "severity": "error"
-                })
+    # 用 iter_code_aware_lines 跳过代码围栏内部，避免把代码块里的 ###### 误判为越级标题。
+    for line_num, line in iter_code_aware_lines(file_path):
+        # 检查是否有超出四级体系的标题（Level 5+）
+        if line.startswith("######"):
+            errors.append({
+                "line": line_num,
+                "type": "overflow",
+                "level": "Level 5+",
+                "message": f"发现超过四级的标题（Level 5+），违反四级标题体系规范",
+                "severity": "error"
+            })
 
     return errors
 
