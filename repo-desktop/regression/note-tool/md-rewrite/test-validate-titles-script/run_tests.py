@@ -80,8 +80,16 @@ class TestRunner:
                 timeout=30
             )
 
+            # validate_titles.py 的设计：
+            # - 返回码 0: 文档有效（valid: true）
+            # - 返回码 1: 文档无效（valid: false，有错误）
+            # - 返回码其他值: 脚本执行失败
+            script_executed_successfully = result.returncode in [0, 1]
+
             return {
-                'success': result.returncode == 0,
+                'success': script_executed_successfully,
+                'is_valid': result.returncode == 0,
+                'detected_errors': result.returncode == 1,
                 'stdout': result.stdout,
                 'stderr': result.stderr,
                 'returncode': result.returncode
@@ -89,6 +97,8 @@ class TestRunner:
         except subprocess.TimeoutExpired:
             return {
                 'success': False,
+                'is_valid': False,
+                'detected_errors': False,
                 'stdout': '',
                 'stderr': '脚本执行超时（30秒）',
                 'returncode': -1
@@ -96,6 +106,8 @@ class TestRunner:
         except Exception as e:
             return {
                 'success': False,
+                'is_valid': False,
+                'detected_errors': False,
                 'stdout': '',
                 'stderr': f'执行错误: {str(e)}',
                 'returncode': -1
@@ -107,9 +119,13 @@ class TestRunner:
             'test_name': test_case['file_name'],
             'objective': test_case['test_objective'].strip(),
             'script_success': script_result['success'],
+            'script_executed': script_result.get('success', False),
+            'document_valid': script_result.get('is_valid', False),
+            'errors_detected': script_result.get('detected_errors', False),
             'script_output': script_result['stdout'],
             'script_errors': script_result['stderr'],
             'expected_behavior': test_case['expected_results'].strip(),
+            'return_code': script_result.get('returncode', -1),
             'manual_review_required': True,
             'notes': []
         }
@@ -117,6 +133,10 @@ class TestRunner:
         # 基本的自动检查
         if not script_result['success']:
             analysis['notes'].append('⚠️ 脚本执行失败，需要检查错误信息')
+        elif script_result.get('detected_errors', False):
+            analysis['notes'].append('✅ 脚本检测到预期的错误（这是正常行为）')
+        elif script_result.get('is_valid', False):
+            analysis['notes'].append('✅ 文档验证通过（符合四级标题体系）')
         elif 'syntax error' in script_result['stderr'].lower():
             analysis['notes'].append('⚠️ 发现语法错误，需要检查脚本代码')
         else:
@@ -135,6 +155,17 @@ class TestRunner:
         else:
             raise ValueError(f'不支持的报告格式: {output_format}')
 
+    def _get_status_info(self, result: Dict[str, Any]) -> str:
+        """获取状态信息"""
+        if not result.get('script_success'):
+            return '❌ 脚本执行失败'
+        elif result.get('errors_detected'):
+            return '✅ 脚本成功执行（检测到预期错误）'
+        elif result.get('document_valid'):
+            return '✅ 脚本成功执行（文档有效）'
+        else:
+            return '⚠️ 未知状态'
+
     def _generate_markdown_report(self, timestamp: str) -> str:
         """生成 Markdown 格式的报告"""
         report_lines = [
@@ -150,18 +181,55 @@ class TestRunner:
             f"- **脚本成功执行**: {self.passed_count}",
             f"- **脚本执行失败**: {self.failed_count}",
             f"",
+            f"> 说明：",
+            f"> - 脚本成功执行：返回码 0（文档有效）或 1（检测到错误）",
+            f"> - 脚本执行失败：返回码其他值（参数错误、异常等）",
+            f"",
             f"## 详细测试结果",
             f""
         ]
 
         for result in self.results:
+            status_info = self._get_status_info(result)
             report_lines.extend([
                 f"### {result['test_name']}",
                 f"",
                 f"**测试目的**: {result['objective']}",
                 f"",
-                f"**执行状态**: {'✅ 成功' if result['script_success'] else '❌ 失败'}",
-                f""
+                f"**执行状态**: {status_info}",
+                f"",
+                f"**返回码**: {result.get('return_code', 'N/A')}",
+            ])
+
+            if result.get('document_valid') is not None:
+                report_lines.append(f"**文档有效性**: {'✅ 有效' if result['document_valid'] else '❌ 无效（检测到错误）'}")
+
+            if result.get('errors_detected'):
+                report_lines.append(f"**错误检测**: ⚠️ 检测到预期错误")
+
+            report_lines.extend([
+                f"",
+                f"**分析备注**:",
+            ])
+
+            for note in result.get('notes', []):
+                report_lines.append(f"- {note}")
+
+            report_lines.extend([
+                f"",
+                f"**脚本输出**:",
+                f"```",
+            ])
+
+            try:
+                output_data = json.loads(result['script_output'])
+                report_lines.append(json.dumps(output_data, ensure_ascii=False, indent=2))
+            except:
+                report_lines.append(result['script_output'][:500])
+
+            report_lines.extend([
+                "```",
+                ""
             ])
 
             if result['script_errors']:
@@ -271,12 +339,12 @@ def check_environment():
     print(f"✅ 脚本路径验证成功")
 
     print("✅ 环境检查完成\n")
-    return script_path
+    return current_dir, script_path
 
 def main():
     """主函数"""
     # 检查测试环境
-    script_path = check_environment()
+    current_dir, script_path = check_environment()
 
     # 创建测试运行器
     runner = TestRunner(current_dir, script_path)
